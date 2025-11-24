@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Story Ucapan — Selamat Ulang Tahun, Dena!</title>
+<style>
+  /* -------------------------
+     Clean, story-sized layout
+     ------------------------- */
+  :root{
+    --bg:#061022;
+    --accent1:#ff6b81;
+    --accent2:#ffd166;
+    --muted:rgba(255,255,255,0.78);
+    --white: #ffffff;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%; background: #000; display:flex; align-items:center; justify-content:center; font-family:Inter, Poppins, system-ui, -apple-system, "Segoe UI", Roboto, Arial; color:#fff}
+  /* Preview wrapper scaled down for desktop; the story canvas itself is 1080x1920 */
+  .viewport{ width:360px; transform:scale(0.3333333); transform-origin:top left; height:640px; }
+
+  /* STORY CANVAS */
+  .story {
+    width:1080px; height:1920px; border-radius:30px; overflow:hidden; position:relative;
+    background:
+      radial-gradient(circle at 12% 12%, rgba(255,107,129,0.04), transparent 14%),
+      linear-gradient(180deg,#081223,#04101a);
+    box-shadow: 0 30px 120px rgba(0,0,0,0.6);
+    -webkit-font-smoothing:antialiased;
+  }
+
+  /* TOP */
+  .top{ position:absolute; top:88px; left:84px; right:84px; display:flex; align-items:center; justify-content:space-between; gap:24px }
+  .logo{ width:96px; height:96px; border-radius:18px; display:flex; align-items:center; justify-content:center; font-weight:900; font-size:34px; background:linear-gradient(90deg,var(--accent1),var(--accent2)); color:#111; box-shadow:0 12px 40px rgba(0,0,0,0.45) }
+  .title { text-align:left; }
+  .title h1{ font-family: 'Sacramento', cursive; font-size:72px; margin:0; line-height:0.95; text-shadow: 0 18px 40px rgba(0,0,0,0.6) }
+  .title p{ margin-top:8px; color:var(--muted); font-size:22px; max-width:720px }
+
+  /* CENTER: photo and messages */
+  .center{ position:absolute; top:260px; left:160px; right:160px; bottom:340px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:28px }
+  .photo-frame{ width:820px; height:820px; border-radius:50%; overflow:hidden; border:20px solid rgba(255,255,255,0.03); box-shadow: 0 30px 90px rgba(0,0,0,0.7); background:#111 }
+  .photo-frame img{ width:100%; height:100%; object-fit:cover; display:block }
+
+  .note{ color:var(--accent2); font-weight:800; font-size:34px; text-shadow:0 10px 30px rgba(0,0,0,0.45) }
+  .name{ font-family:'Sacramento', cursive; font-size:96px; color:#fff; margin-top:6px; text-shadow:0 26px 64px rgba(0,0,0,0.7); letter-spacing:1px; }
+  .wish{ max-width:900px; text-align:center; color:rgba(255,255,255,0.94); font-size:36px; line-height:1.35; padding:0 24px }
+
+  /* BOTTOM controls */
+  .bottom{ position:absolute; left:84px; right:84px; bottom:84px; display:flex; justify-content:space-between; align-items:center; gap:12px }
+  .controls{ display:flex; gap:14px; align-items:center }
+  .btn{
+    padding:14px 20px; border-radius:999px; border:1px solid rgba(255,255,255,0.06); background:transparent; color:#fff; font-weight:800; cursor:pointer; font-size:18px; box-shadow:0 14px 36px rgba(0,0,0,0.45)
+  }
+  .btn.primary{ background:linear-gradient(90deg,var(--accent1),var(--accent2)); color:#111; border:none; box-shadow:0 20px 48px rgba(255,107,129,0.12) }
+  .btn.ghost{ background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.04) }
+
+  /* modal */
+  .modal{ position:fixed; inset:0; display:flex; align-items:center; justify-content:center; background:rgba(2,6,23,0.6); visibility:hidden; opacity:0; transition:all .18s; z-index:9999 }
+  .modal.show{ visibility:visible; opacity:1 }
+  .box{ width:920px; max-width:92%; background:#fff; color:#111; border-radius:14px; padding:28px; box-shadow:0 30px 90px rgba(0,0,0,0.6) }
+  .box h2{ margin:0; font-family:'Sacramento', cursive; font-size:44px }
+  .prayer{ margin-top:14px; font-size:20px; line-height:1.6; color:#333 }
+  .ageBadge{ display:inline-block; margin-top:14px; background:linear-gradient(90deg,var(--accent1),var(--accent2)); color:#111; padding:14px 20px; border-radius:999px; font-weight:900; font-size:24px }
+
+  /* confetti pieces */
+  .confetti-piece{ position:fixed; width:12px; height:16px; pointer-events:none; z-index:10000; border-radius:2px }
+
+  /* small responsive preview note (desktop) */
+  @media(max-width:1100px){
+    .viewport{ transform: scale(0.28) }
+  }
+  @media(max-width:800px){
+    .viewport{ transform: scale(0.22) }
+  }
+</style>
+</head>
+<body>
+
+  <!-- Preview wrapper scaled down for desktop editing -->
+  <div class="viewport" aria-hidden="true">
+    <div class="story" id="storyRoot" role="main" aria-label="Ucapan ulang tahun story">
+      <div class="top">
+        <div class="logo">UH</div>
+        <div class="title">
+          <h1 id="titleText">Selamat Ulang Tahun, Dena!</h1>
+          <p id="subtitle">Semoga hari ini membawa kebahagiaan dan berkah yang melimpah</p>
+        </div>
+      </div>
+
+      <div class="center">
+        <div class="photo-frame" aria-hidden="false">
+          <!-- local uploaded photo -->
+          <img id="mainPhoto" src="den.jpg" alt="Foto Dena">
+        </div>
+
+        <div class="note" id="noteText">Hari Spesialmu</div>
+        <div class="name" id="nameText">Dena</div>
+        <div class="wish" id="wishText">Semoga panjang umur, sehat selalu, dan segala harapanmu tercapai. Semoga hari ini membawa keberkahan dan kebahagiaan yang melimpah. ✨</div>
+      </div>
+
+      <div class="bottom">
+        <div class="controls">
+          <button class="btn primary" id="surpriseBtn">🎉 Surprise</button>
+          <button class="btn" id="saveBtn">⬇ Simpan Story (PNG)</button>
+          <button class="btn" id="printBtn">🖨 Cetak</button>
+        </div>
+
+        <div class="controls">
+          <button class="btn ghost" id="playToggle">Putar Musik Latar</button>
+          <button class="btn ghost" id="copyBtn">📋 Salin & Kirim</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Modal with doa & age -->
+  <div id="modal" class="modal" aria-hidden="true">
+    <div class="box" role="dialog" aria-labelledby="modalTitle">
+      <h2 id="modalTitle">Doa & Ucapan</h2>
+      <div class="prayer" id="prayerText">
+        Ya Allah, semoga Engkau panjangkan umur Dena, berikan kesehatan yang terbaik, lapangkan rezeki, dan mudahkan setiap urusannya. Jadikan langkah hidupnya penuh berkah, serta kabulkan doa-doa dan cita-citanya. Amin.
+        dan semoga mendapat yang lebig baik hehe:>
+        
+      </div>
+      <div>
+        <span class="ageBadge">Selamat bertambah usia: <span id="ageToShow">22</span> tahun</span>
+      </div>
+
+      <div style="display:flex;gap:12px;justify-content:flex-end;margin-top:18px">
+        <button class="btn" id="replayVoiceBtn">🔁 Ulangi Suara</button>
+        <button class="btn primary" id="closeModalBtn">OK</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Hidden audio element using the uploaded MP4 file -->
+  <audio id="hbdAudio" src="Video WhatsApp 2025-11-22 pukul 23.50.29_effe43c2.mp4" preload="auto"></audio>
+  
+
+<script>
+/* --------------------------
+   Script: Surprise flow & utils
+   -------------------------- */
+
+/* Config */
+const TARGET_AGE = 22;
+
+/* Elements */
+const surpriseBtn = document.getElementById('surpriseBtn');
+const saveBtn = document.getElementById('saveBtn');
+const printBtn = document.getElementById('printBtn');
+const playToggle = document.getElementById('playToggle');
+const copyBtn = document.getElementById('copyBtn');
+
+const modal = document.getElementById('modal');
+const closeModalBtn = document.getElementById('closeModalBtn');
+const replayVoiceBtn = document.getElementById('replayVoiceBtn');
+const ageToShow = document.getElementById('ageToShow');
+const prayerText = document.getElementById('prayerText');
+
+const nameText = document.getElementById('nameText');
+const wishText = document.getElementById('wishText');
+const storyRoot = document.getElementById('storyRoot');
+
+const hbdAudio = document.getElementById('hbdAudio');
+
+/* Initialize */
+ageToShow.textContent = TARGET_AGE;
+
+/* Confetti function */
+function makeConfettiBurst(count=140){
+  const colors = ['#ff6b81','#ffd166','#5ad1ff','#7ef8d4','#d28cff'];
+  for(let i=0;i<count;i++){
+    const el = document.createElement('div');
+    el.className = 'confetti-piece';
+    el.style.background = colors[Math.floor(Math.random()*colors.length)];
+    el.style.left = (Math.random()*100) + 'vw';
+    el.style.top = '-10vh';
+    el.style.opacity = (0.6 + Math.random()*0.4);
+    el.style.transform = 'rotate(' + (Math.random()*360) + 'deg)';
+    el.style.width = (6 + Math.random()*12) + 'px';
+    el.style.height = (10 + Math.random()*14) + 'px';
+    document.body.appendChild(el);
+
+    const duration = 1700 + Math.random()*2200;
+    el.animate([
+      { transform: `translateY(0) rotate(${Math.random()*360}deg)`, opacity: el.style.opacity },
+      { transform: `translateY(${80 + Math.random()*60}vh) rotate(${Math.random()*1440}deg)`, opacity: 0.95 }
+    ], { duration, easing: 'cubic-bezier(.2,.7,.3,1)', delay: Math.random()*300 });
+
+    setTimeout(()=> el.remove(), duration + 600);
+  }
+}
+
+/* Text-to-Speech */
+function speakMessage(){
+  if(!('speechSynthesis' in window)) return;
+  window.speechSynthesis.cancel();
+  const nm = nameText.textContent || 'Dena';
+  const wish = wishText.textContent || '';
+  // Avoid 'kue' and similar — composed message
+  const msg = `Selamat ulang tahun ${nm}! Selamat bertambah usia menjadi ${TARGET_AGE} tahun. ${wish} Doa kami, semoga panjang umur, sehat selalu, dan dimudahkan rezeki serta urusannya. Amin.`;
+  const u = new SpeechSynthesisUtterance(msg);
+  u.lang = 'id-ID';
+  u.rate = 0.95;
+  u.pitch = 1.02;
+  const voices = window.speechSynthesis.getVoices();
+  if(voices && voices.length){
+    u.voice = voices.find(v => v.lang && v.lang.startsWith('id')) || voices[0];
+  }
+  window.speechSynthesis.speak(u);
+}
+
+/* Surprise: play mp4 audio, speak, confetti, show modal */
+async function surpriseAll(){
+  // Show modal
+  modal.classList.add('show');
+  modal.setAttribute('aria-hidden','false');
+
+  // Play uploaded HBD audio (mp4 file) from start
+  try {
+    hbdAudio.currentTime = 0;
+    // Attempt to play; user gesture from click should allow autoplay
+    await hbdAudio.play();
+  } catch(e){
+    // Some browsers block autoplay; inform user
+    console.warn('Audio play blocked:', e);
+  }
+
+  // TTS speak
+  speakMessage();
+
+  // Confetti
+  makeConfettiBurst(160);
+
+  // Age badge animation (simple)
+  ageToShow.style.transform = 'translateY(20px) scale(.9)';
+  ageToShow.style.opacity = '0';
+  setTimeout(()=> {
+    ageToShow.style.transition = 'all .9s cubic-bezier(.2,.9,.2,1)';
+    ageToShow.style.transform = 'translateY(0) scale(1)';
+    ageToShow.style.opacity = '1';
+  }, 60);
+}
+
+/* Replay voice & audio */
+function replaySurprise(){
+  // replay audio and TTS
+  hbdAudio.currentTime = 0;
+  hbdAudio.play().catch(()=>{});
+  speakMessage();
+  makeConfettiBurst(120);
+}
+
+/* Background music toggle (plays same file but looped softly) */
+let bgPlaying = false;
+playToggle.addEventListener('click', ()=>{
+  if(!bgPlaying){
+    hbdAudio.loop = true;
+    hbdAudio.volume = 0.85;
+    hbdAudio.play().catch(()=>{});
+    bgPlaying = true;
+    playToggle.textContent = 'Pause Musik Latar';
+  } else {
+    hbdAudio.pause();
+    hbdAudio.currentTime = 0;
+    bgPlaying = false;
+    playToggle.textContent = 'Putar Musik Latar';
+  }
+});
+
+/* Save story as PNG (1080x1920) using foreignObject -> canvas (may vary by browser) */
+async function saveStoryAsPNG(){
+  const el = document.getElementById('storyRoot');
+  const rectW = 1080, rectH = 1920;
+  // clone and remove interactive elements
+  const clone = el.cloneNode(true);
+  clone.querySelectorAll('button').forEach(n=>n.remove());
+  const serialized = new XMLSerializer().serializeToString(clone);
+  const svg = `<svg xmlns='http://www.w3.org/2000/svg' width='${rectW}' height='${rectH}'>
+    <foreignObject width='100%' height='100%'>${serialized}</foreignObject>
+  </svg>`;
+  const url = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
+  return new Promise((res, rej) => {
+    const img = new Image();
+    img.onload = ()=>{
+      const canvas = document.createElement('canvas');
+      canvas.width = rectW; canvas.height = rectH;
+      const ctx = canvas.getContext('2d');
+      ctx.fillStyle = '#061022'; ctx.fillRect(0,0,canvas.width,canvas.height);
+      ctx.drawImage(img,0,0);
+      try{
+        const dataUrl = canvas.toDataURL('image/png');
+        const a = document.createElement('a');
+        a.href = dataUrl;
+        a.download = `${nameText.textContent || 'ucapan'}-story.png`;
+        a.click();
+        res();
+      }catch(e){ rej(e); }
+    };
+    img.onerror = (e)=> rej(e);
+    img.src = url;
+  });
+}
+
+/* Copy text quick-send */
+async function copyQuick(){
+  const text = `Selamat Ulang Tahun, ${nameText.textContent}!\n\n${wishText.textContent}\n\nSelamat bertambah usia menjadi ${TARGET_AGE} tahun! 🎉`;
+  try{
+    await navigator.clipboard.writeText(text);
+    alert('Teks ucapan disalin — paste di chat untuk kirim.');
+  }catch{
+    alert('Tidak dapat mengakses clipboard. Silakan salin manual.');
+  }
+}
+
+/* Event bindings */
+surpriseBtn.addEventListener('click', surpriseAll);
+replayVoiceBtn.addEventListener('click', replaySurprise);
+closeModalBtn.addEventListener('click', ()=> {
+  modal.classList.remove('show');
+  modal.setAttribute('aria-hidden','true');
+  window.speechSynthesis.cancel();
+  // stop audio playback (if playing)
+  try{ hbdAudio.pause(); hbdAudio.currentTime = 0; }catch(e){}
+});
+saveBtn.addEventListener('click', ()=> saveStoryAsPNG().catch(()=> alert('Gagal menyimpan; silakan screenshot resolusi tinggi sebagai alternatif.')));
+printBtn.addEventListener('click', ()=> window.print());
+copyBtn.addEventListener('click', copyQuick);
+
+/* Small on-load visuals */
+window.addEventListener('load', ()=> {
+  setTimeout(()=> makeConfettiBurst(28), 700);
+  // pre-load voices
+  if('speechSynthesis' in window) window.speechSynthesis.getVoices();
+});
+
+/* Accessibility: Esc closes modal & stops speech/audio */
+document.addEventListener('keydown', (e)=>{
+  if(e.key === 'Escape'){
+    modal.classList.remove('show');
+    modal.setAttribute('aria-hidden','true');
+    window.speechSynthesis.cancel();
+    try{ hbdAudio.pause(); hbdAudio.currentTime = 0; }catch(e){}
+  }
+});
+</script>
+</body>
+</html>
